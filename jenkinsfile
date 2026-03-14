@@ -29,7 +29,7 @@ pipeline {
                     if [ ! -f Dockerfile ]; then
                         echo "Création d\'un Dockerfile simple..."
                         cat > Dockerfile << 'EOF'
-FROM cirrusci/flutter:3.19.6
+FROM fischerscode/flutter:3.19.6
 
 RUN apt-get update && apt-get install -y nodejs npm && rm -rf /var/lib/apt/lists/*
 RUN npm install -g firebase-tools
