@@ -77,7 +77,7 @@ EOF
 
         stage('Archive Artifacts') {
             steps {
-                archiveArtifacts artifacts: 'build/web/**', fingerprint: true
+                archiveArtifacts artifacts: 'web/**', fingerprint: true
                 publishHTML([
                     allowMissing: false,
                     alwaysLinkToLastBuild: true,
