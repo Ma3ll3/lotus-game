@@ -1,65 +1,33 @@
 pipeline {
-
     agent any
 
-
-
     environment {
-
         API_KEY_BROWSER = credentials('firebase-api-key-browser')
-
         API_KEY_ANDROID = credentials('firebase-api-key-android')
-
         API_KEY_IOS = credentials('firebase-api-key-ios')
-
         API_KEY_MACOS = credentials('firebase-api-key-macos')
-
         API_KEY_WINDOWS = credentials('firebase-api-key-windows')
-
     }
 
-
-
     stages {
-
-
-
         stage('Setup Environment') {
-
             steps {
-
                 sh '''
-
                     echo "API_KEY_BROWSER=${API_KEY_BROWSER}" > .env
-
                     echo "API_KEY_ANDROID=${API_KEY_ANDROID}" >> .env
-
                     echo "API_KEY_IOS=${API_KEY_IOS}" >> .env
-
                     echo "API_KEY_MACOS=${API_KEY_MACOS}" >> .env
-
                     echo "API_KEY_WINDOWS=${API_KEY_WINDOWS}" >> .env
-
                     echo "Contenu du .env:"
-
                     cat .env
-
                     
-
                     echo "Vérification des fichiers du projet:"
-
                     ls -la
-
                     
-
                     # Créer un Dockerfile simple si non présent
-
                     if [ ! -f Dockerfile ]; then
-
                         echo "Création d\'un Dockerfile simple..."
-
                         cat > Dockerfile << 'EOF'
-
 FROM instrumentisto/flutter:3.41.4
 
 RUN apt-get update && apt-get install -y nodejs npm && rm -rf /var/lib/apt/lists/*
@@ -67,64 +35,34 @@ RUN npm install -g firebase-tools
 
 WORKDIR /app
 
-
-
 COPY pubspec.yaml ./
-
 RUN flutter pub get
-
-
 
 COPY . .
 
-
-
 RUN echo "API_KEY_BROWSER=\${API_KEY_BROWSER}" >> .env
-
 RUN echo "API_KEY_ANDROID=\${API_KEY_ANDROID}" >> .env
-
 RUN echo "API_KEY_IOS=\${API_KEY_IOS}" >> .env
-
 RUN echo "API_KEY_MACOS=\${API_KEY_MACOS}" >> .env
-
 RUN echo "API_KEY_WINDOWS=\${API_KEY_WINDOWS}" >> .env
 
-
-
 CMD ["tail", "-f", "/dev/null"]
-
 EOF
-
                     fi
-
                     
-
                     echo "Contenu du Dockerfile:"
-
                     cat Dockerfile
-
                 '''
-
             }
-
         }
 
-
-
         stage('Build Flutter Docker') {
-
             steps {
-
                 sh '''
-
                     echo "Construction de l\'image Docker Flutter..."
-
                     docker build -t flutter-builder .
-
                     
-
                     echo "Lancement du build dans le container Docker..."
-
                     docker run --rm \
                         -v $(pwd):/app \
                         -v $(pwd)/.env:/app/.env \
@@ -135,62 +73,33 @@ EOF
                             flutter analyze &&
                             flutter test --coverage &&
                             flutter build web --release &&
-                            flutter build apk --release &&
-                            flutter build ios --release &&
-                            flutter build macos --release &&
-                            flutter build windows --release
+                            flutter build apk --release
                         "
-
                 '''
-
             }
-
         }
-
-
 
         stage('Archive Artifacts') {
-
             steps {
-
                 archiveArtifacts artifacts: 'build/web/**', fingerprint: true
-
                 archiveArtifacts artifacts: 'build/app/outputs/flutter-apk/app-release.apk', fingerprint: true
-
                 publishHTML([
-
                     allowMissing: false,
-
                     alwaysLinkToLastBuild: true,
-
                     keepAll: true,
-
                     reportDir: 'coverage',
-
                     reportFiles: 'lcov.info',
-
                     reportName: 'Coverage Report'
-
                 ])
-
             }
-
         }
 
-
-
         stage('Deploy Firebase') {
-
             when {
-
                 branch 'main'
-
             }
-
             steps {
-
                 sh '''
-
                     docker run --rm \
                         -v $(pwd):/app \
                         -w /app \
@@ -200,37 +109,20 @@ EOF
                             npm install -g firebase-tools &&
                             firebase deploy --only hosting --token \${FIREBASE_TOKEN}
                         "
-
                 '''
-
             }
-
         }
-
-
-
-    post {
-
-        always {
-
-            cleanWs()
-
-        }
-
-        success {
-
-            echo 'Build et déploiement réussis!'
-
-        }
-
-        failure {
-
-            echo 'Échec du build ou du déploiement'
-
-        }
-
     }
 
-}
-
+    post {
+        always {
+            cleanWs()
+        }
+        success {
+            echo 'Build et déploiement réussis!'
+        }
+        failure {
+            echo 'Échec du build ou du déploiement'
+        }
+    }
 }
