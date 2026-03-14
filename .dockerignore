@@ -1,0 +1,38 @@
+# Git
+.git/
+.gitignore
+
+# Documentation
+README.md
+SETUP_ENV.md
+
+# Docker
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+# Jenkins
+Jenkinsfile
+
+# Flutter/Android
+build/
+.android/
+flutter_*.log
+
+# Environment files (sensibles)
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+*.iml
+*.ipr
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log

@@ -1,0 +1,31 @@
+version: "3.8"
+
+services:
+
+  jenkins:
+    image: jenkins/jenkins:lts
+    ports:
+      - "8080:8080"
+    volumes:
+      - jenkins_data:/var/jenkins_home
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ${PWD}:/workspace
+    environment:
+      - DOCKER_HOST=unix:///var/run/docker.sock
+
+  flutter-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - API_KEY_BROWSER=${API_KEY_BROWSER}
+      - API_KEY_ANDROID=${API_KEY_ANDROID}
+      - API_KEY_IOS=${API_KEY_IOS}
+      - API_KEY_MACOS=${API_KEY_MACOS}
+      - API_KEY_WINDOWS=${API_KEY_WINDOWS}
+    volumes:
+      - ./build:/app/build
+    command: ["tail", "-f", "/dev/null"]
+
+volumes:
+  jenkins_data:
