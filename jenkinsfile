@@ -7,6 +7,7 @@ pipeline {
         API_KEY_IOS = credentials('firebase-api-key-ios')
         API_KEY_MACOS = credentials('firebase-api-key-macos')
         API_KEY_WINDOWS = credentials('firebase-api-key-windows')
+        GOOGLE_SERVICES_JSON = credentials('firebase-api-key-android')
     }
 
     stages {
@@ -45,6 +46,10 @@ RUN echo "API_KEY_ANDROID=\${API_KEY_ANDROID}" >> .env
 RUN echo "API_KEY_IOS=\${API_KEY_IOS}" >> .env
 RUN echo "API_KEY_MACOS=\${API_KEY_MACOS}" >> .env
 RUN echo "API_KEY_WINDOWS=\${API_KEY_WINDOWS}" >> .env
+
+# Créer google-services.json avec les credentials Jenkins
+RUN mkdir -p android/app
+RUN echo '${GOOGLE_SERVICES_JSON}' > android/app/google-services.json
 
 CMD ["tail", "-f", "/dev/null"]
 EOF
