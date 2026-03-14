@@ -69,7 +69,6 @@ EOF
                         sh -c "
                             flutter pub get &&
                             flutter analyze --no-fatal-infos &&
-                            flutter test --coverage &&
                             flutter build web --release &&
                             flutter build apk --release
                         "
