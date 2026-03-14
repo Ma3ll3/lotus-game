@@ -7,7 +7,6 @@ pipeline {
         API_KEY_IOS = credentials('firebase-api-key-ios')
         API_KEY_MACOS = credentials('firebase-api-key-macos')
         API_KEY_WINDOWS = credentials('firebase-api-key-windows')
-        GOOGLE_SERVICES_JSON = credentials('google-services-json')
     }
 
     stages {
@@ -47,10 +46,6 @@ RUN echo "API_KEY_IOS=\${API_KEY_IOS}" >> .env
 RUN echo "API_KEY_MACOS=\${API_KEY_MACOS}" >> .env
 RUN echo "API_KEY_WINDOWS=\${API_KEY_WINDOWS}" >> .env
 
-# Créer google-services.json avec les credentials Jenkins
-RUN mkdir -p android/app
-RUN echo '${GOOGLE_SERVICES_JSON}' > android/app/google-services.json
-
 CMD ["tail", "-f", "/dev/null"]
 EOF
                     fi
@@ -74,8 +69,7 @@ EOF
                         sh -c "
                             flutter pub get &&
                             flutter analyze --no-fatal-infos &&
-                            flutter build web --release &&
-                            flutter build apk --release
+                            flutter build web --release
                         "
                 '''
             }
@@ -84,7 +78,6 @@ EOF
         stage('Archive Artifacts') {
             steps {
                 archiveArtifacts artifacts: 'build/web/**', fingerprint: true
-                archiveArtifacts artifacts: 'build/app/outputs/flutter-apk/app-release.apk', fingerprint: true
                 publishHTML([
                     allowMissing: false,
                     alwaysLinkToLastBuild: true,
