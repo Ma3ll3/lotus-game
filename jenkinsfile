@@ -65,7 +65,6 @@ EOF
                     echo "Lancement du build dans le container Docker..."
                     docker run --rm \
                         -v $(pwd):/app \
-                        -v $(pwd)/.env:/app/.env \
                         -w /app \
                         flutter-builder \
                         sh -c "
