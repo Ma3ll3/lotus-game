@@ -1,7 +1,4 @@
-version: "3.8"
-
 services:
-
   jenkins:
     image: jenkins/jenkins:lts
     ports:
@@ -10,6 +7,8 @@ services:
       - jenkins_data:/var/jenkins_home
       - /var/run/docker.sock:/var/run/docker.sock
       - ${PWD}:/workspace
+    env_file:
+      - .env
     environment:
       - DOCKER_HOST=unix:///var/run/docker.sock
 
@@ -17,15 +16,11 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    environment:
-      - API_KEY_BROWSER=${API_KEY_BROWSER}
-      - API_KEY_ANDROID=${API_KEY_ANDROID}
-      - API_KEY_IOS=${API_KEY_IOS}
-      - API_KEY_MACOS=${API_KEY_MACOS}
-      - API_KEY_WINDOWS=${API_KEY_WINDOWS}
+    env_file:
+      - .env
     volumes:
       - ./build:/app/build
-    command: ["tail", "-f", "/dev/null"]
+    command: [ "tail", "-f", "/dev/null" ]
 
 volumes:
   jenkins_data:
