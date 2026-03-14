@@ -60,7 +60,7 @@ pipeline {
 
                         cat > Dockerfile << 'EOF'
 
-FROM fischerscode/flutter:latest
+FROM instrumentisto/flutter:3.41.4
 
 
 
