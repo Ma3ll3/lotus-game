@@ -64,15 +64,18 @@ EOF
                     
                     echo "Lancement du build dans le container Docker..."
                     docker run --rm \
-                        -v $(pwd):/app \
-                        -w /app \
+                        -v $(pwd):/workspace \
+                        -w /workspace \
                         flutter-builder \
                         sh -c "
+                            cp -r /workspace/* /app/ &&
+                            cd /app &&
                             flutter pub get &&
                             flutter analyze &&
                             flutter test --coverage &&
                             flutter build web --release &&
-                            flutter build apk --release
+                            flutter build apk --release &&
+                            cp -r build/* /workspace/build/
                         "
                 '''
             }
