@@ -1,10 +1,5 @@
 pipeline {
-    agent {
-        docker {
-            image 'cirrusci/flutter:stable'
-            args '-v /var/run/docker.sock:/var/run/docker.sock'
-        }
-    }
+    agent any
 
     environment {
         API_KEY_BROWSER = credentials('firebase-api-key-browser')
@@ -18,29 +13,77 @@ pipeline {
 
         stage('Setup Environment') {
             steps {
-                sh 'echo API_KEY_BROWSER=${API_KEY_BROWSER} > .env'
-                sh 'echo API_KEY_ANDROID=${API_KEY_ANDROID} >> .env'
-                sh 'echo API_KEY_IOS=${API_KEY_IOS} >> .env'
-                sh 'echo API_KEY_MACOS=${API_KEY_MACOS} >> .env'
-                sh 'echo API_KEY_WINDOWS=${API_KEY_WINDOWS} >> .env'
+                sh '''
+                    echo "API_KEY_BROWSER=${API_KEY_BROWSER}" > .env
+                    echo "API_KEY_ANDROID=${API_KEY_ANDROID}" >> .env
+                    echo "API_KEY_IOS=${API_KEY_IOS}" >> .env
+                    echo "API_KEY_MACOS=${API_KEY_MACOS}" >> .env
+                    echo "API_KEY_WINDOWS=${API_KEY_WINDOWS}" >> .env
+                    echo "Contenu du .env:"
+                    cat .env
+                    
+                    echo "Vérification des fichiers du projet:"
+                    ls -la
+                    
+                    # Créer un Dockerfile simple si non présent
+                    if [ ! -f Dockerfile ]; then
+                        echo "Création d\'un Dockerfile simple..."
+                        cat > Dockerfile << 'EOF'
+FROM cirrusci/flutter:stable
+
+RUN apt-get update && apt-get install -y nodejs npm && rm -rf /var/lib/apt/lists/*
+RUN npm install -g firebase-tools
+
+WORKDIR /app
+
+COPY pubspec.yaml pubspec.lock ./
+RUN flutter pub get
+
+COPY . .
+
+RUN echo "API_KEY_BROWSER=\${API_KEY_BROWSER}" >> .env
+RUN echo "API_KEY_ANDROID=\${API_KEY_ANDROID}" >> .env
+RUN echo "API_KEY_IOS=\${API_KEY_IOS}" >> .env
+RUN echo "API_KEY_MACOS=\${API_KEY_MACOS}" >> .env
+RUN echo "API_KEY_WINDOWS=\${API_KEY_WINDOWS}" >> .env
+
+CMD ["tail", "-f", "/dev/null"]
+EOF
+                    fi
+                    
+                    echo "Contenu du Dockerfile:"
+                    cat Dockerfile
+                '''
             }
         }
 
-        stage('Install dependencies') {
+        stage('Build Flutter Docker') {
             steps {
-                sh 'flutter pub get'
+                sh '''
+                    echo "Construction de l\'image Docker Flutter..."
+                    docker build -t flutter-builder .
+                    
+                    echo "Lancement du build dans le container Docker..."
+                    docker run --rm \
+                        -v $(pwd):/workspace \
+                        -v $(pwd)/.env:/workspace/.env \
+                        -w /workspace \
+                        flutter-builder \
+                        sh -c "
+                            flutter pub get &&
+                            flutter analyze &&
+                            flutter test --coverage &&
+                            flutter build web --release &&
+                            flutter build apk --release
+                        "
+                '''
             }
         }
 
-        stage('Lint') {
+        stage('Archive Artifacts') {
             steps {
-                sh 'flutter analyze'
-            }
-        }
-
-        stage('Tests') {
-            steps {
-                sh 'flutter test --coverage'
+                archiveArtifacts artifacts: 'build/web/**', fingerprint: true
+                archiveArtifacts artifacts: 'build/app/outputs/flutter-apk/app-release.apk', fingerprint: true
                 publishHTML([
                     allowMissing: false,
                     alwaysLinkToLastBuild: true,
@@ -52,27 +95,22 @@ pipeline {
             }
         }
 
-        stage('Build Web') {
-            steps {
-                sh 'flutter build web --release'
-                archiveArtifacts artifacts: 'build/web/**', fingerprint: true
-            }
-        }
-
-        stage('Build Android') {
-            steps {
-                sh 'flutter build apk --release'
-                archiveArtifacts artifacts: 'build/app/outputs/flutter-apk/app-release.apk', fingerprint: true
-            }
-        }
-
         stage('Deploy Firebase') {
             when {
                 branch 'main'
             }
             steps {
-                sh 'npm install -g firebase-tools'
-                sh 'firebase deploy --only hosting --token ${FIREBASE_TOKEN}'
+                sh '''
+                    docker run --rm \
+                        -v $(pwd):/workspace \
+                        -w /workspace \
+                        -e FIREBASE_TOKEN=${FIREBASE_TOKEN} \
+                        flutter-builder \
+                        sh -c "
+                            npm install -g firebase-tools &&
+                            firebase deploy --only hosting --token \${FIREBASE_TOKEN}
+                        "
+                '''
             }
         }
     }
