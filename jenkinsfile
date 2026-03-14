@@ -78,14 +78,6 @@ EOF
         stage('Archive Artifacts') {
             steps {
                 archiveArtifacts artifacts: 'web/**', fingerprint: true
-                publishHTML([
-                    allowMissing: false,
-                    alwaysLinkToLastBuild: true,
-                    keepAll: true,
-                    reportDir: 'coverage',
-                    reportFiles: 'lcov.info',
-                    reportName: 'Coverage Report'
-                ])
             }
         }
 
