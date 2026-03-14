@@ -29,7 +29,7 @@ pipeline {
                     if [ ! -f Dockerfile ]; then
                         echo "Création d\'un Dockerfile simple..."
                         cat > Dockerfile << 'EOF'
-FROM fischerscode/flutter:3.19.6
+FROM fischerscode/flutter:3.24.5
 
 USER root
 RUN apt-get update && apt-get install -y nodejs npm && rm -rf /var/lib/apt/lists/*
