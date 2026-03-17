@@ -30,7 +30,11 @@ pipeline {
                         cat > Dockerfile << 'EOF'
 FROM instrumentisto/flutter:3.41.4
 
-RUN apt-get update && apt-get install -y nodejs npm && rm -rf /var/lib/apt/lists/*
+# Installer Node.js 20 au lieu de la version par défaut
+RUN apt-get update && apt-get install -y curl && \
+    curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && \
+    apt-get install -y nodejs npm && rm -rf /var/lib/apt/lists/*
+
 RUN npm install -g firebase-tools
 
 WORKDIR /app
@@ -41,10 +45,6 @@ RUN flutter pub get
 COPY . .
 
 RUN echo "API_KEY_BROWSER=\${API_KEY_BROWSER}" >> .env
-RUN echo "API_KEY_ANDROID=\${API_KEY_ANDROID}" >> .env
-RUN echo "API_KEY_IOS=\${API_KEY_IOS}" >> .env
-RUN echo "API_KEY_MACOS=\${API_KEY_MACOS}" >> .env
-RUN echo "API_KEY_WINDOWS=\${API_KEY_WINDOWS}" >> .env
 
 CMD ["tail", "-f", "/dev/null"]
 EOF
