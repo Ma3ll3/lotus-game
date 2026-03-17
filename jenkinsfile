@@ -83,23 +83,14 @@ EOF
         stage('Deploy Firebase') {
             steps {
                 sh '''
-                    echo "Déploiement Firebase depuis le workspace Git..."
+                    echo "Déploiement Firebase direct depuis le workspace..."
                     cd /var/jenkins_home/workspace/lotus-game-pipeline
-                    echo "Contenu du workspace Git:"
+                    echo "Contenu du workspace:"
                     ls -la
-                    echo "Vérification firebase.json:"
-                    ls -la firebase.json
-                    docker run --rm \
-                        -v /var/jenkins_home/workspace/lotus-game-pipeline:/workspace \
-                        -w /workspace \
-                        -e FIREBASE_TOKEN=${FIREBASE_TOKEN} \
-                        node:20-alpine \
-                        sh -c "
-                            npm install -g firebase-tools &&
-                            echo 'Contenu dans le conteneur:' &&
-                            ls -la &&
-                            firebase deploy --only hosting --token \${FIREBASE_TOKEN}
-                        "
+                    echo "Installation de Firebase Tools..."
+                    npm install -g firebase-tools
+                    echo "Déploiement sur Firebase..."
+                    firebase deploy --only hosting --token ${FIREBASE_TOKEN}
                 '''
             }
         }
