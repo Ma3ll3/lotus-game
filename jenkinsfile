@@ -30,14 +30,10 @@ pipeline {
                         cat > Dockerfile << 'EOF'
 FROM instrumentisto/flutter:3.41.4
 
-# Installer Node.js via NVM (plus fiable dans Docker)
-RUN apt-get update && apt-get install -y curl && \
-    curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash && \
-    export NVM_DIR="$HOME/.nvm" && \
-    [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh" && \
-    nvm install 20 && \
-    nvm use 20 && \
-    nvm alias default 20 && \
+# Installer Node.js 20 directement (plus simple)
+RUN apt-get update && \
+    curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && \
+    apt-get install -y nodejs && \
     npm install -g firebase-tools && \
     rm -rf /var/lib/apt/lists/*
 
@@ -98,7 +94,6 @@ EOF
                         -e FIREBASE_TOKEN=${FIREBASE_TOKEN} \
                         flutter-builder \
                         sh -c "
-                            npm install -g firebase-tools &&
                             firebase deploy --only hosting --token \${FIREBASE_TOKEN}
                         "
                 '''
