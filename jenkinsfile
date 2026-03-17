@@ -80,12 +80,6 @@ EOF
             }
         }
 
-        stage('Archive Artifacts') {
-            steps {
-                archiveArtifacts artifacts: 'web/**', fingerprint: true
-            }
-        }
-
         stage('Deploy Firebase') {
             steps {
                 sh '''
@@ -104,6 +98,12 @@ EOF
                             firebase deploy --only hosting --token \${FIREBASE_TOKEN}
                         "
                 '''
+            }
+        }
+
+        stage('Archive Artifacts') {
+            steps {
+                archiveArtifacts artifacts: 'web/**', fingerprint: true
             }
         }
     }
