@@ -65,7 +65,7 @@ EOF
             steps {
                 sh '''
                     echo "Construction de l\'image Docker Flutter..."
-                    docker build -t flutter-builder .
+                    docker build --no-cache -t flutter-builder .
                     
                     echo "Lancement du build dans le container Docker..."
                     docker run --rm \
