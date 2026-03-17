@@ -48,6 +48,12 @@ RUN flutter pub get
 
 COPY . .
 
+RUN echo "API_KEY_BROWSER=${API_KEY_BROWSER}" >> .env
+RUN echo "API_KEY_ANDROID=${API_KEY_ANDROID}" >> .env
+RUN echo "API_KEY_IOS=${API_KEY_IOS}" >> .env
+RUN echo "API_KEY_MACOS=${API_KEY_MACOS}" >> .env
+RUN echo "API_KEY_WINDOWS=${API_KEY_WINDOWS}" >> .env
+
 CMD ["tail", "-f", "/dev/null"]
 EOF
                     fi
