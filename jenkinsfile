@@ -92,6 +92,11 @@ EOF
                     apt-get install -y nodejs
                     echo "Installation de Firebase Tools..."
                     npm install -g firebase-tools
+                    echo "Préparation des fichiers pour Firebase..."
+                    mkdir -p build/web
+                    cp -r web/* build/web/
+                    echo "Contenu de build/web:"
+                    ls -la build/web
                     echo "Déploiement sur Firebase..."
                     firebase deploy --only hosting --token ${FIREBASE_TOKEN}
                 '''
