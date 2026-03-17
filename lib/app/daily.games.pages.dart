@@ -72,10 +72,16 @@ class _DailyWordlePageState extends State<DailyWordlePage> {
         'àáâäãåāăąçćčďđèéêëēėęěğǵḧîíïīĩįìłḿñńǹňôöòóœøōõőṕŕřßśšşťțûúùüūůűųẃẍÿýžźż';
     const String withoutAccents =
         'aaaaaaaaaacccddeeeeeeeegghiiiiiilmnnnnoooooooooprrssssttuuuuuuuuwxyyzzzz';
+    const String validLetters = 'abcdefghijklmnopqrstuvwxyz';
 
     String result = '';
     for (int i = 0; i < text.length; i++) {
       String char = text[i].toLowerCase();
+      // Vérifier si le caractère est une lettre valide
+      if (!validLetters.contains(char)) {
+        continue; // Ignorer les caractères non alphabétiques
+      }
+
       int index = withAccents.indexOf(char);
       if (index != -1) {
         result += withoutAccents[index];
