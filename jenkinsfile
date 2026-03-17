@@ -7,6 +7,7 @@ pipeline {
         API_KEY_IOS = credentials('firebase-api-key-ios')
         API_KEY_MACOS = credentials('firebase-api-key-macos')
         API_KEY_WINDOWS = credentials('firebase-api-key-windows')
+        FIREBASE_TOKEN = credentials('firebase-token')
     }
 
     stages {
