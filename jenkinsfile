@@ -87,6 +87,9 @@ EOF
                     cd /var/jenkins_home/workspace/lotus-game-pipeline
                     echo "Contenu du workspace:"
                     ls -la
+                    echo "Installation de Node.js et npm..."
+                    curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
+                    apt-get install -y nodejs
                     echo "Installation de Firebase Tools..."
                     npm install -g firebase-tools
                     echo "Déploiement sur Firebase..."
