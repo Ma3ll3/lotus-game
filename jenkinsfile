@@ -88,6 +88,8 @@ EOF
                     ls -la
                     echo "Vérification firebase.json:"
                     ls -la firebase.json
+                    echo "Montage du workspace courant:"
+                    echo "PWD: $(pwd)"
                     docker run --rm \
                         -v $(pwd):/workspace \
                         -w /workspace \
@@ -95,6 +97,8 @@ EOF
                         node:20-alpine \
                         sh -c "
                             npm install -g firebase-tools &&
+                            echo 'Contenu dans le conteneur:' &&
+                            ls -la &&
                             firebase deploy --only hosting --token \${FIREBASE_TOKEN}
                         "
                 '''
